@@ -66,7 +66,7 @@ public abstract class PgConverterResolver
         if (expectPortableTypeIds && resolution.PgTypeId.IsOid || !expectPortableTypeIds && resolution.PgTypeId.IsDataTypeName)
             throw new InvalidOperationException($"{methodName}' returned a resolution with a {nameof(PgConverterResolution.PgTypeId)} that was not in canonical form.");
 
-        if (expectedPgTypeId is not null && resolution.PgTypeId != expectedPgTypeId)
+        if (expectedPgTypeId is not null && !resolution.Converter.CanHandle(expectedPgTypeId.Value))
             throw new InvalidOperationException(
                 $"'{methodName}' returned a different {nameof(PgConverterResolution.PgTypeId)} than was passed in as expected." +
                 $" If such a mismatch occurs an exception should be thrown instead.");

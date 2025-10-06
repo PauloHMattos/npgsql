@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Npgsql.Internal.Postgres;
 
 namespace Npgsql.Internal;
 
@@ -93,6 +94,8 @@ public abstract class PgConverter
         bufferRequirements = BufferRequirements.Value;
         return format is DataFormat.Binary;
     }
+
+    public virtual bool CanHandle(PgTypeId pgTypeId) => false;
 }
 
 public abstract class PgConverter<T> : PgConverter

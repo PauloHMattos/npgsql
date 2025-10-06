@@ -119,7 +119,7 @@ sealed class TypeInfoCache<TPgTypeId>(PgSerializerOptions options, bool validate
             if (info is null)
                 return null;
 
-            if (pgTypeId is not null && info.PgTypeId != pgTypeId)
+            if (pgTypeId is not null && !info.CanHandle(pgTypeId.Value))
                 throw new InvalidOperationException("A Postgres type was passed but the resolved PgTypeInfo does not have an equal PgTypeId.");
 
             if (type is not null && info.Type != type)

@@ -96,7 +96,7 @@ public sealed class PgSerializerOptions
         => GetTypeInfoCore(type, GetCanonicalTypeId(pgTypeId));
 
     // If a given type id is in the opposite form than what was expected it will be mapped according to the requirement.
-    internal PgTypeId GetCanonicalTypeId(PgTypeId pgTypeId)
+    public PgTypeId GetCanonicalTypeId(PgTypeId pgTypeId)
         => PortableTypeIds ? DatabaseInfo.GetDataTypeName(pgTypeId) : DatabaseInfo.GetOid(pgTypeId);
 
     // If a given type id is in the opposite form than what was expected it will be mapped according to the requirement.

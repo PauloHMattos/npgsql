@@ -240,6 +240,11 @@ public class PgTypeInfo
             return default;
         }
     }
+
+    internal bool CanHandle(PgTypeId pgTypeId)
+    {
+        return pgTypeId == PgTypeId || (Converter?.CanHandle(pgTypeId) ?? false);
+    }
 }
 
 public sealed class PgResolverTypeInfo(
