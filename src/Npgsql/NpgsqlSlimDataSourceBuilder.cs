@@ -24,7 +24,7 @@ namespace Npgsql;
 /// On this builder, various features are disabled by default; unless you're looking to save on code size (e.g. when publishing with
 /// NativeAOT), use <see cref="NpgsqlDataSourceBuilder" /> instead.
 /// </remarks>
-public sealed class NpgsqlSlimDataSourceBuilder : INpgsqlTypeMapper
+public sealed class NpgsqlSlimDataSourceBuilder : INpgsqlDataSourceBuilder
 {
     static UnsupportedTypeInfoResolver<NpgsqlSlimDataSourceBuilder> UnsupportedTypeInfoResolver { get; } = new();
 
@@ -48,6 +48,7 @@ public sealed class NpgsqlSlimDataSourceBuilder : INpgsqlTypeMapper
     Func<NpgsqlConnectionStringBuilder, CancellationToken, ValueTask<string>>? _periodicPasswordProvider;
     TimeSpan _periodicPasswordSuccessRefreshInterval, _periodicPasswordFailureRefreshInterval;
 
+    List<DbTypeResolverFactory>? _dbTypeResolverFactories;
     PgTypeInfoResolverChainBuilder _resolverChainBuilder = new(); // mutable struct, don't make readonly.
 
     readonly UserTypeMapper _userTypeMapper;
@@ -532,7 +533,12 @@ public sealed class NpgsqlSlimDataSourceBuilder : INpgsqlTypeMapper
         => _userTypeMapper.UnmapComposite(clrType, pgName, nameTranslator);
 
     /// <inheritdoc />
-    public void AddTypeInfoResolverFactory(PgTypeInfoResolverFactory factory) => _resolverChainBuilder.PrependResolverFactory(factory);
+    public void AddDbTypeResolverFactory(DbTypeResolverFactory factory)
+        => (_dbTypeResolverFactories ??= new()).Add(factory);
+
+    /// <inheritdoc />
+    public void AddTypeInfoResolverFactory(PgTypeInfoResolverFactory factory)
+        => _resolverChainBuilder.PrependResolverFactory(factory);
 
     /// <inheritdoc />
     void INpgsqlTypeMapper.Reset() => _resolverChainBuilder.Clear();
@@ -887,6 +893,7 @@ public sealed class NpgsqlSlimDataSourceBuilder : INpgsqlTypeMapper
             _periodicPasswordSuccessRefreshInterval,
             _periodicPasswordFailureRefreshInterval,
             _resolverChainBuilder.Build(ConfigureResolverChain),
+            _dbTypeResolverFactories ?? [],
             DefaultNameTranslator,
             _connectionInitializer,
             _connectionInitializerAsync,
@@ -957,4 +964,6 @@ public sealed class NpgsqlSlimDataSourceBuilder : INpgsqlTypeMapper
         _userTypeMapper.MapComposite(clrType, pgName, nameTranslator);
         return this;
     }
+
+    INpgsqlDataSourceBuilder INpgsqlDataSourceBuilder.Instance() => this;
 }
